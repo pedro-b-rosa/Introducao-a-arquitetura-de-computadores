@@ -2,10 +2,10 @@
 # IAC 2023/2024 k-means
 # 
 # Grupo:
-# Campus:
+# Campus: Alameda
 #
 # Autores:
-# n_aluno, nome
+# 106426, Pedro Rosa
 # n_aluno, nome
 # n_aluno, nome
 #
@@ -46,7 +46,7 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 centroids:   .word 0,0
 k:           .word 1
 
-# Valores de centroids, k e L a usar na 2a parte do prejeto:
+# Valores de centroids, k e L a usar na 2a parte do projeto:
 #centroids:   .word 0,0, 10,0, 0,10
 #k:           .word 3
 #L:           .word 10
@@ -105,7 +105,7 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecr√£
+# Limpa todos os pontos do ecr„
 # Argumentos: nenhum
 # Retorno: nenhum
 
