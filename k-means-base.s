@@ -110,40 +110,25 @@ printPoint:
 
 cleanScreen:
     # POR IMPLEMENTAR (1a parte)
-    addi sp, sp, -12
-    sw ra, 0(sp)
-    sw s0, 4(sp)
-    sw s1, 8(sp)
-    
-    li s0, 32 # Linhas
-    jal ra, cleanLinhas
-    
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
-    jr ra
-
-cleanLinhas:
-    beq s0, x0, acabaLoop
-    li s1, 32
-    addi s0, s0, -1
-    j cleanColunas
-    
-cleanColunas:
-    beq s1, x0, cleanLinhas
     addi sp, sp, -4
     sw ra, 0(sp)
     
-    addi s1, s1, -1
-    mv a0, s0
-    mv a1, s1
+    li a0, 1024 # numero de pontos 32*32 = 1024
+    li a1, LED_MATRIX_0_BASE
     li a2, white
-    jal ra, printPoint
+    jal ra, cleanLoop
     
     lw ra, 0(sp)
     addi sp, sp, 4
-    j cleanColunas
+    jr ra
+
+cleanLoop:
+    beq a0, x0, acabaLoop
+    sw a2, 0(a1)
+    addi a1, a1, 4
+    addi a0, a0, -1
+    j cleanLoop
+    
     
 acabaLoop:
     jr ra
