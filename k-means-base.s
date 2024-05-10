@@ -184,19 +184,15 @@ printListaPontos:
 
 printCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -12
+    addi sp, sp, -4
     sw ra, 0(sp)
-    sw s0, 4(sp)
-    sw s1, 8(sp)
     
     lw a0, k # numero de centroids
     la a1, centroids # endereco da lista de centroids
     jal ra, printListaPontos
     
     lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
+    addi sp, sp, 4
     jr ra
 
 ### calculateCentroids
