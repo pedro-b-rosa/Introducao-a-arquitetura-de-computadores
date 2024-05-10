@@ -110,24 +110,24 @@ printPoint:
 
 cleanScreen:
     # POR IMPLEMENTAR (1a parte)
-    addi sp, sp, -4
-    sw ra, 0(sp)
+    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
     
     li a0, 1024 # numero de pontos 32*32 = 1024
-    li a1, LED_MATRIX_0_BASE
-    li a2, white
-    jal ra, cleanLoop
+    li a1, LED_MATRIX_0_BASE # endereco do primeiro ponto da matrix
+    li a2, white # cor que vamos pintar a matrix
+    jal ra, cleanLoop # entra no Loop para limpar ponto a ponto
     
-    lw ra, 0(sp)
-    addi sp, sp, 4
-    jr ra
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 4 # Dah pop na stack
+    jr ra # dah jump para ra
 
 cleanLoop:
-    beq a0, x0, acabaLoop
-    sw a2, 0(a1)
-    addi a1, a1, 4
-    addi a0, a0, -1
-    j cleanLoop
+    beq a0, x0, acabaLoop # acaba o loop caso a0 = 0
+    sw a2, 0(a1) # pinta de branco o ponto da matrix com o endereco a1
+    addi a1, a1, 4 # passa para o próximo ponto da matrix
+    addi a0, a0, -1 # reduz o contador (a0)
+    j cleanLoop # volta para o loop 
     
     
 acabaLoop:
@@ -140,41 +140,37 @@ acabaLoop:
 
 printClusters:
     # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -12
-    sw ra, 0(sp)
-    sw s0, 4(sp)
-    sw s1, 8(sp)
+    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
     
     lw a0, n_points # numero de pontos
     la a1, points # endereco da lista de pontos
     jal ra, printListaPontos
     
-    lw ra, 0(sp)
-    lw s0, 4(sp)
-    lw s1, 8(sp)
-    addi sp, sp, 12
-    jr ra
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 4 # Dah pop na stack
+    jr ra 
 
 printListaPontos:
     beq a0, x0, acabaLoop
-    addi sp, sp, -12
-    sw ra, 0(sp)
-    sw a0, 4(sp)
-    sw a1, 8(sp)
+    addi sp, sp, -12 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    sw a0, 4(sp) # Guarda o numero de pontos que ainda falta pintar
+    sw a1, 8(sp) # Guarda o endereco o x que vamos pintar
     
     lw a0, 0(a1) # x
     lw a1, 4(a1) # y
-    li a2, black
+    li a2, black # cor do ponto
     jal ra, printPoint
     
-    lw a0, 4(sp)
-    lw a1, 8(sp)
+    lw a0, 4(sp) # Recupera o numero de pontos que ainda falta pintar
+    lw a1, 8(sp) # Recupera o endereco o x que pintamos
     addi a1, a1, 8 # passa para o proximo x
-    addi a0, a0, -1
+    addi a0, a0, -1 # decrementa 1 ao contador
     
-    lw ra, 0(sp)
-    addi sp, sp, 12
-    j printListaPontos
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 12 # Dah pop na stack
+    j printListaPontos # volta para o inicio do loop
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -184,16 +180,16 @@ printListaPontos:
 
 printCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -4
-    sw ra, 0(sp)
+    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
     
     lw a0, k # numero de centroids
     la a1, centroids # endereco da lista de centroids
     jal ra, printListaPontos
     
-    lw ra, 0(sp)
-    addi sp, sp, 4
-    jr ra
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 4 # Dah pop na stack
+    jr ra 
 
 ### calculateCentroids
 # Calcula os k centroides, a partir da distribuicao atual de pontos associados a cada agrupamento (cluster)
@@ -202,8 +198,8 @@ printCentroids:
 
 calculateCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -8
-    sw ra, 0(sp)
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
     sw s0, 4(sp)
     
     lw s0, n_points # numero de pontos
@@ -218,10 +214,10 @@ calculateCentroids:
     sw t0, 0(t2) # guarda o valor de x do centroid
     sw t1, 4(t2) # guarda o valor de y do centroid
     
-    lw ra, 0(sp)
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
     lw s0, 4(sp)
-    addi sp, sp, 8
-    jr ra
+    addi sp, sp, 8 # Dah pop na stack
+    jr ra 
 
 ### soma
 # soma os pontos
@@ -242,8 +238,8 @@ soma:
     j soma
     
 acabaSoma:
-    mv a0, t0
-    mv a1, t1
+    mv a0, t0 # guarda o valor da soma x no registo de retorno
+    mv a1, t1 # guarda o valor da soma y no registo de retorno
     jr ra
     
 ### mainSingleCluster
@@ -257,7 +253,7 @@ mainSingleCluster:
     # POR IMPLEMENTAR (1a parte)
     la t0, k
     li t1, 1
-    sw t1, 0(t1)
+    sw t1, 0(t0)
 
     #2. cleanScreen
     # POR IMPLEMENTAR (1a parte)
