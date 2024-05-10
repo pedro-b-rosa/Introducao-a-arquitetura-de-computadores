@@ -46,7 +46,7 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 centroids:   .word 0,0
 k:           .word 1
 
-# Valores de centroids, k e L a usar na 2a parte do projeto:
+# Valores de centroids, k e L a usar na 2a parte do prejeto:
 #centroids:   .word 0,0, 10,0, 0,10
 #k:           .word 3
 #L:           .word 10
@@ -64,7 +64,6 @@ colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0
 
 .equ         black      0
 .equ         white      0xffffff
-
 
 
 # Codigo
@@ -105,14 +104,49 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecrã
+# Limpa todos os pontos do ecr?
 # Argumentos: nenhum
 # Retorno: nenhum
 
 cleanScreen:
     # POR IMPLEMENTAR (1a parte)
+    addi sp, sp, -12
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    
+    li s0, 32 # Linhas
+    jal ra, cleanLinhas
+    
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    addi sp, sp, 12
     jr ra
 
+cleanLinhas:
+    beq s0, x0, acabaLoop
+    li s1, 32
+    addi s0, s0, -1
+    j cleanColunas
+    
+cleanColunas:
+    beq s1, x0, cleanLinhas
+    addi sp, sp, -4
+    sw ra, 0(sp)
+    
+    addi s1, s1, -1
+    mv a0, s0
+    mv a1, s1
+    li a2, white
+    jal ra, printPoint
+    
+    lw ra, 0(sp)
+    addi sp, sp, 4
+    j cleanColunas
+    
+acabaLoop:
+    jr ra
     
 ### printClusters
 # Pinta os agrupamentos na LED matrix com a cor correspondente.
@@ -121,8 +155,36 @@ cleanScreen:
 
 printClusters:
     # POR IMPLEMENTAR (1a e 2a parte)
+    addi sp, sp, -12
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
+    
+    lw s0, n_points # numero de pontos
+    la s1, points # endereco da lista de pontos
+    jal ra, printListaPontos
+    
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    addi sp, sp, 12
     jr ra
 
+printListaPontos:
+    beq s0, x0, acabaLoop
+    addi sp, sp, -4
+    sw ra, 0(sp)
+    
+    addi s0, s0, -1
+    lw a0, 0(s1) # x
+    lw a1, 4(s1) # y
+    li a2, black
+    jal ra, printPoint
+    addi s1, s1, 8 # passa para o proximo x
+    
+    lw ra, 0(sp)
+    addi sp, sp, 4
+    j printListaPontos
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -132,8 +194,20 @@ printClusters:
 
 printCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
-    jr ra
+    addi sp, sp, -12
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    sw s1, 8(sp)
     
+    lw s0, k # numero de centroids
+    la s1, centroids # endereco da lista de centroids
+    jal ra, printListaPontos
+    
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    lw s1, 8(sp)
+    addi sp, sp, 12
+    jr ra
 
 ### calculateCentroids
 # Calcula os k centroides, a partir da distribuicao atual de pontos associados a cada agrupamento (cluster)
@@ -142,9 +216,50 @@ printCentroids:
 
 calculateCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
+    addi sp, sp, -8
+    sw ra, 0(sp)
+    sw s0, 4(sp)
+    
+    lw s0, n_points # numero de pontos
+    mv a0, s0
+    la a1, points # endereco da lista de pontos
+    li t0, 0 # inicializar os contadores a 0
+    li t1, 0
+    jal ra, soma
+    div t0, a0, s0
+    div t1, a1, s0
+    la t2, centroids
+    sw t0, 0(t2) # guarda o valor de x do centroid
+    sw t1, 4(t2) # guarda o valor de y do centroid
+    
+    lw ra, 0(sp)
+    lw s0, 4(sp)
+    addi sp, sp, 8
     jr ra
 
-
+### soma
+# soma os pontos
+# Argumentos:
+# a0: numero de pontos
+# a1: endereco da lista de pontos
+# Retorno:
+# a0: soma dos x
+# a1: soma dos y
+soma:
+    beq a0, x0, acabaSoma
+    addi a0, a0, -1
+    lw t2, 0(a1) # x
+    lw t3, 4(a1) # y
+    add t0, t0, t2
+    add t1, t1, t3
+    addi a1, a1, 8 # passa para o proximo x
+    j soma
+    
+acabaSoma:
+    mv a0, t0
+    mv a1, t1
+    jr ra
+    
 ### mainSingleCluster
 # Funcao principal da 1a parte do projeto.
 # Argumentos: nenhum
@@ -154,18 +269,25 @@ mainSingleCluster:
 
     #1. Coloca k=1 (caso nao esteja a 1)
     # POR IMPLEMENTAR (1a parte)
+    la t0, k
+    li t1, 1
+    sw t1, 0(t1)
 
     #2. cleanScreen
     # POR IMPLEMENTAR (1a parte)
-
+    jal ra, cleanScreen
+    
     #3. printClusters
     # POR IMPLEMENTAR (1a parte)
+    jal ra, printClusters
 
     #4. calculateCentroids
     # POR IMPLEMENTAR (1a parte)
+    jal ra, calculateCentroids
 
     #5. printCentroids
     # POR IMPLEMENTAR (1a parte)
+    jal ra, printCentroids
 
     #6. Termina
     jr ra
