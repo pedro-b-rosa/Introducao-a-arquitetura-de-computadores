@@ -104,7 +104,7 @@ printPoint:
     
 
 ### cleanScreen
-# Limpa todos os pontos do ecr?
+# Limpa todos os pontos do ecra
 # Argumentos: nenhum
 # Retorno: nenhum
 
@@ -160,8 +160,8 @@ printClusters:
     sw s0, 4(sp)
     sw s1, 8(sp)
     
-    lw s0, n_points # numero de pontos
-    la s1, points # endereco da lista de pontos
+    lw a0, n_points # numero de pontos
+    la a1, points # endereco da lista de pontos
     jal ra, printListaPontos
     
     lw ra, 0(sp)
@@ -171,19 +171,24 @@ printClusters:
     jr ra
 
 printListaPontos:
-    beq s0, x0, acabaLoop
-    addi sp, sp, -4
+    beq a0, x0, acabaLoop
+    addi sp, sp, -12
     sw ra, 0(sp)
+    sw a0, 4(sp)
+    sw a1, 8(sp)
     
-    addi s0, s0, -1
-    lw a0, 0(s1) # x
-    lw a1, 4(s1) # y
+    lw a0, 0(a1) # x
+    lw a1, 4(a1) # y
     li a2, black
     jal ra, printPoint
-    addi s1, s1, 8 # passa para o proximo x
+    
+    lw a0, 4(sp)
+    lw a1, 8(sp)
+    addi a1, a1, 8 # passa para o proximo x
+    addi a0, a0, -1
     
     lw ra, 0(sp)
-    addi sp, sp, 4
+    addi sp, sp, 12
     j printListaPontos
 
 ### printCentroids
@@ -199,8 +204,8 @@ printCentroids:
     sw s0, 4(sp)
     sw s1, 8(sp)
     
-    lw s0, k # numero de centroids
-    la s1, centroids # endereco da lista de centroids
+    lw a0, k # numero de centroids
+    la a1, centroids # endereco da lista de centroids
     jal ra, printListaPontos
     
     lw ra, 0(sp)
