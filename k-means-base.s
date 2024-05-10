@@ -1,13 +1,13 @@
 #
 # IAC 2023/2024 k-means
 # 
-# Grupo:
+# Grupo: 47
 # Campus: Alameda
 #
 # Autores:
 # 106426, Pedro Rosa
-# n_aluno, nome
-# n_aluno, nome
+# 109576, Jose Silvestre
+# 109736, Pedro Menezes
 #
 # Tecnico/ULisboa
 
