@@ -166,7 +166,7 @@ printClusters:
 # Retorno: nenhum
 
 printListaPontos:
-    beq a0, x0, acabaLoop
+    beq a0, x0, acabaLoop # se a0 = 0 acaba
     addi sp, sp, -12 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     sw a0, 4(sp) # Guarda o numero de pontos que ainda falta pintar
@@ -214,22 +214,22 @@ calculateCentroids:
     # POR IMPLEMENTAR (1a e 2a parte)
     addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
-    sw s0, 4(sp)
+    sw s0, 4(sp) # Guarda s0
     
     lw s0, n_points # numero de pontos
-    mv a0, s0
+    mv a0, s0 # copia o valor em s0 para a0
     la a1, points # endereco da lista de pontos
     li t0, 0 # inicializar os contadores a 0
     li t1, 0
     jal ra, soma
-    div t0, a0, s0
-    div t1, a1, s0
-    la t2, centroids
+    div t0, a0, s0 # divide a soma dos x pelo numero de pontos
+    div t1, a1, s0 # divide a soma dos y pelo numero de pontos
+    la t2, centroids # endereco do centroid
     sw t0, 0(t2) # guarda o valor de x do centroid
     sw t1, 4(t2) # guarda o valor de y do centroid
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
-    lw s0, 4(sp)
+    lw s0, 4(sp) # Recupera o valor de s0
     addi sp, sp, 8 # Dah pop na stack
     jr ra 
 
@@ -242,12 +242,12 @@ calculateCentroids:
 # a0: soma dos x
 # a1: soma dos y
 soma:
-    beq a0, x0, acabaSoma
-    addi a0, a0, -1
+    beq a0, x0, acabaSoma # se a0 = 0 acaba
+    addi a0, a0, -1 # a0 = a0 -1
     lw t2, 0(a1) # x
     lw t3, 4(a1) # y
-    add t0, t0, t2
-    add t1, t1, t3
+    add t0, t0, t2 # t0 = t0 + t2
+    add t1, t1, t3 # t1 = t1 + t3
     addi a1, a1, 8 # passa para o proximo x
     j soma
     
