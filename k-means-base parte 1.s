@@ -122,13 +122,20 @@ cleanScreen:
     addi sp, sp, 4 # Dah pop na stack
     jr ra # dah jump para ra
 
+### cleanLoop
+# Limpa todos os pontos do ecra
+# Argumentos:
+# a0: numero de pontos 32*32 = 1024
+# a1: endereco do primeiro ponto da matrix
+# a2: cor que vamos pintar a matrix
+# Retorno: nenhum
+
 cleanLoop:
     beq a0, x0, acabaLoop # acaba o loop caso a0 = 0
     sw a2, 0(a1) # pinta de branco o ponto da matrix com o endereco a1
-    addi a1, a1, 4 # passa para o próximo ponto da matrix
+    addi a1, a1, 4 # passa para o pr?ximo ponto da matrix
     addi a0, a0, -1 # reduz o contador (a0)
     j cleanLoop # volta para o loop 
-    
     
 acabaLoop:
     jr ra
@@ -150,6 +157,13 @@ printClusters:
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 4 # Dah pop na stack
     jr ra 
+
+### printListaPontos
+# Pinta os agrupamentos na LED matrix com a cor correspondente.
+# Argumentos:
+# a0: numero de pontos
+# a1: endereco da lista de pontos
+# Retorno: nenhum
 
 printListaPontos:
     beq a0, x0, acabaLoop
