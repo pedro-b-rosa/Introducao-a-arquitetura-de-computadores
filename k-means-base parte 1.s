@@ -46,18 +46,6 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 centroids:   .word 0,0
 k:           .word 1
 
-# Valores de centroids, k e L a usar na 2a parte do prejeto:
-#centroids:   .word 0,0, 10,0, 0,10
-#k:           .word 3
-#L:           .word 10
-
-# Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
-# que o grupo considere necessarias para a solucao:
-#clusters:    
-
-
-
-
 #Definicoes de cores a usar no projeto 
 
 colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0, 1, 2, etc.
@@ -109,7 +97,6 @@ printPoint:
 # Retorno: nenhum
 
 cleanScreen:
-    # POR IMPLEMENTAR (1a parte)
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
@@ -146,7 +133,6 @@ acabaLoop:
 # Retorno: nenhum
 
 printClusters:
-    # POR IMPLEMENTAR (1a e 2a parte)
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
@@ -193,7 +179,6 @@ printListaPontos:
 # Retorno: nenhum
 
 printCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
@@ -211,7 +196,6 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
     addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     sw s0, 4(sp) # Guarda s0
@@ -290,40 +274,4 @@ mainSingleCluster:
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 4 # Dah pop na stack
     #6. Termina
-    jr ra
-
-
-
-### manhattanDistance
-# Calcula a distancia de Manhattan entre (x0,y0) e (x1,y1)
-# Argumentos:
-# a0, a1: x0, y0
-# a2, a3: x1, y1
-# Retorno:
-# a0: distance
-
-manhattanDistance:
-    # POR IMPLEMENTAR (2a parte)
-    jr ra
-
-
-### nearestCluster
-# Determina o centroide mais perto de um dado ponto (x,y).
-# Argumentos:
-# a0, a1: (x, y) point
-# Retorno:
-# a0: cluster index
-
-nearestCluster:
-    # POR IMPLEMENTAR (2a parte)
-    jr ra
-
-
-### mainKMeans
-# Executa o algoritmo *k-means*.
-# Argumentos: nenhum
-# Retorno: nenhum
-
-mainKMeans:  
-    # POR IMPLEMENTAR (2a parte)
     jr ra
