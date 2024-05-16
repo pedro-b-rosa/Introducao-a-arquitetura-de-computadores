@@ -262,6 +262,8 @@ acabaSoma:
 # Retorno: nenhum
 
 mainSingleCluster:
+    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
 
     #1. Coloca k=1 (caso nao esteja a 1)
     # POR IMPLEMENTAR (1a parte)
@@ -284,7 +286,9 @@ mainSingleCluster:
     #5. printCentroids
     # POR IMPLEMENTAR (1a parte)
     jal ra, printCentroids
-
+    
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 4 # Dah pop na stack
     #6. Termina
     jr ra
 
