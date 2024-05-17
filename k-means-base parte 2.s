@@ -203,39 +203,25 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
+    sw s0, 4(sp) # Guarda o valor de s0
     
     lw a0, n_points # Guarda em a0 o numero de pontos
     la a1, points # Guarda em a1 o endereco para o primeiro elemento da lista de pontos
     la a2, clusters #Guarda em a2 o enderesso para o primeiro elemento de lista clusters
-    lw a3, k # Guarda em a3 o numero de centroides 
-    jal ra, calculateLoop
+    lw s3, k # Guarda em a3 o numero de centroides 
+    calculateLoop:
+        beq s3, x0, acabaLoop
     
+        addi s3, s3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)_____________________________________________________
+    
+        j calculateLoop
+    
+    lw s0, 4(sp) # Recupera o valor de s0
     lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
+    addi sp, sp, 8 # Dah pop na stack
     jr ra 
-
-### calculateLoop
-# corre a soma para cada centroid
-# Argumentos:
-# a0: numero de pontos
-# a1: endereco da lista de pontos
-# a2: endereco da lista de clusters
-# a3: numero de centroids
-# Retorno: nenhum
-
-calculateLoop:
-    beq a3, x0, acabaLoop
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    
-    addi a3, a3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)
-    
-    
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
-    jr ra
 
 ### soma
 # soma os pontos
@@ -246,7 +232,7 @@ calculateLoop:
 # Retorno:
 # a0: soma dos x
 # a1: soma dos y
-# a3: 
+# a2: numero de pontos desse centoide
 soma:
     beq a0, x0, acabaSoma # se a0 = 0 acaba
     addi a0, a0, -1 # a0 = a0 -1
@@ -329,7 +315,17 @@ nearestCluster:
     li s4, 0x7FFFFFFF # inicializa s5 com o maior valor de inteiro
     li s5, 0 # inicializa o cluster index a 0
 
-    jal ra, comparaCentroids
+    comparaCentroids:
+        mv a0, s0 # guarda em a0 o valor de x0
+        mv a1, s1 # guarda em a1 o valor de y0
+        lw a2, 0(s3) # guarda em a2 o valor de x1
+        lw a3, 4(s3) # guarda em a3 o valor de y1
+        jal ra, manhattanDistance
+        jal ra, atualizaMinimo
+    
+        addi s3, s3, 8 # passa para o endereco do proximo x
+        addi s2, s2, -1 # reduz o contador
+        bne s2, x0, comparaCentroids
     mv a0, s5
     
     lw s5, 24(sp) # Recupera o valor de s5
@@ -341,25 +337,6 @@ nearestCluster:
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 28 # Dah pop na stack
     jr ra
-
-comparaCentroids:
-    beq s2, x0, acabaLoop
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    
-    mv a0, s0 # guarda em a0 o valor de x0
-    mv a1, s1 # guarda em a1 o valor de y0
-    lw a2, 0(s3) # guarda em a2 o valor de x1
-    lw a3, 4(s3) # guarda em a3 o valor de y1
-    jal ra, manhattanDistance
-    jal ra, atualizaMinimo
-    
-    addi s3, s3, 8 # passa para o endereco do proximo x
-    addi s2, s2, -1 # reduz o contador
-    
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
-    j comparaCentroids
     
 atualizaMinimo:
     bgt a0, s4, acabaLoop # se a0 > s4 entao nao troca os minimos

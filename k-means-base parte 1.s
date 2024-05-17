@@ -97,32 +97,17 @@ printPoint:
 # Retorno: nenhum
 
 cleanScreen:
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    li t0, 1024 # numero de pontos 32*32 = 1024
+    li t1, LED_MATRIX_0_BASE # endereco do primeiro ponto da matrix
+    li t2, white # cor que vamos pintar a matrix
     
-    li a0, 1024 # numero de pontos 32*32 = 1024
-    li a1, LED_MATRIX_0_BASE # endereco do primeiro ponto da matrix
-    li a2, white # cor que vamos pintar a matrix
-    jal ra, cleanLoop # entra no Loop para limpar ponto a ponto
+    cleanLoop:
+        sw t2, 0(t1) # pinta de branco o ponto da matrix com o endereco a1
+        addi t1, t1, 4 # passa para o pr?ximo ponto da matrix
+        addi t0, t0, -1 # reduz o contador (a0)
+        bne t0, t0, cleanLoop # volta caso a0 != 0
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
     jr ra # dah jump para ra
-
-### cleanLoop
-# Limpa todos os pontos do ecra
-# Argumentos:
-# a0: numero de pontos 32*32 = 1024
-# a1: endereco do primeiro ponto da matrix
-# a2: cor que vamos pintar a matrix
-# Retorno: nenhum
-
-cleanLoop:
-    beq a0, x0, acabaLoop # acaba o loop caso a0 = 0
-    sw a2, 0(a1) # pinta de branco o ponto da matrix com o endereco a1
-    addi a1, a1, 4 # passa para o pr?ximo ponto da matrix
-    addi a0, a0, -1 # reduz o contador (a0)
-    j cleanLoop # volta para o loop 
     
 acabaLoop:
     jr ra
@@ -133,44 +118,32 @@ acabaLoop:
 # Retorno: nenhum
 
 printClusters:
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda s0
+    sw s1, 4(sp) # Guarda s1
     
-    lw a0, n_points # numero de pontos
-    la a1, points # endereco da lista de pontos
-    jal ra, printListaPontos
+    lw s0, n_points # numero de pontos
+    la s1, points # endereco da lista de pontos
+    printListaPontos:
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
+        
+        lw a0, 0(s1) # x
+        lw a1, 4(s1) # y
+        li a2, black # cor do ponto
+        jal ra, printPoint
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
+        addi s1, s1, 8 # passa para o proximo x
+        addi s0, s0, -1 # decrementa 1 ao contador
+        
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s0, x0, printListaPontos # se a0 = 0 acaba
+    
+    lw s0, 0(sp) # Recupera s0
+    lw s1, 4(sp) # Recupera s1
+    addi sp, sp, 8 # Dah pop na stack
     jr ra 
-
-### printListaPontos
-# Pinta os agrupamentos na LED matrix com a cor correspondente.
-# Argumentos:
-# a0: numero de pontos
-# a1: endereco da lista de pontos
-# Retorno: nenhum
-
-printListaPontos:
-    beq a0, x0, acabaLoop # se a0 = 0 acaba
-    addi sp, sp, -12 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    sw a0, 4(sp) # Guarda o numero de pontos que ainda falta pintar
-    sw a1, 8(sp) # Guarda o endereco o x que vamos pintar
-    
-    lw a0, 0(a1) # x
-    lw a1, 4(a1) # y
-    li a2, black # cor do ponto
-    jal ra, printPoint
-    
-    lw a0, 4(sp) # Recupera o numero de pontos que ainda falta pintar
-    lw a1, 8(sp) # Recupera o endereco o x que pintamos
-    addi a1, a1, 8 # passa para o proximo x
-    addi a0, a0, -1 # decrementa 1 ao contador
-    
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 12 # Dah pop na stack
-    j printListaPontos # volta para o inicio do loop
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -179,15 +152,31 @@ printListaPontos:
 # Retorno: nenhum
 
 printCentroids:
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda s0
+    sw s1, 4(sp) # Guarda s1
     
-    lw a0, k # numero de centroids
-    la a1, centroids # endereco da lista de centroids
-    jal ra, printListaPontos
+    lw s0, k # numero de centroids
+    la s1, centroids # endereco da lista de centroids
+    printListaCentroids:
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
+        
+        lw a0, 0(s1) # x
+        lw a1, 4(s1) # y
+        li a2, black # cor do ponto
+        jal ra, printPoint
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
+        addi s1, s1, 8 # passa para o proximo x
+        addi s0, s0, -1 # decrementa 1 ao contador
+        
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s0, x0, printListaPontos # se a0 = 0 acaba
+    
+    lw s0, 0(sp) # Recupera s0
+    lw s1, 4(sp) # Recupera s1
+    addi sp, sp, 8 # Dah pop na stack
     jr ra 
 
 ### calculateCentroids
