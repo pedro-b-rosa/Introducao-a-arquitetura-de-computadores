@@ -214,7 +214,8 @@ calculateCentroids:
     calculateLoop:
         beq s3, x0, acabaLoop
     
-        addi s3, s3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)_____________________________________________________
+        addi s3, s3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)
+        
     
         j calculateLoop
     
@@ -306,18 +307,19 @@ nearestCluster:
     sw s4, 20(sp) # Guarda o valor de s4
     sw s5, 24(sp) # Guarda o valor de s5
     
-    lw a2, k # guarda o valor de k em a2
-    la a3, centroids # guarda em a3 o primeiro endereco do vetor centroids
+    lw s2, k # guarda o valor de k em a2
+    la s3, centroids # guarda em a3 o primeiro endereco do vetor centroids
     mv s0, a0 # guarda o valor de a0 em s0
     mv s1, a1 # guarda o valor de a1 em s1
-    mv s2, a2 # guarda o valor de a2 em s2
-    mv s3, a3 # guarda o valor de a3 em s3
     li s4, 0x7FFFFFFF # inicializa s5 com o maior valor de inteiro
     li s5, 0 # inicializa o cluster index a 0
 
     comparaCentroids:
-        mv a0, s0 # guarda em a0 o valor de x0
-        mv a1, s1 # guarda em a1 o valor de y0
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
+        
+        mv a0, s0 # guarda em a0 o valor de x0 (x do ponto)
+        mv a1, s1 # guarda em a1 o valor de y0 (y do ponto)
         lw a2, 0(s3) # guarda em a2 o valor de x1
         lw a3, 4(s3) # guarda em a3 o valor de y1
         jal ra, manhattanDistance
@@ -325,7 +327,9 @@ nearestCluster:
     
         addi s3, s3, 8 # passa para o endereco do proximo x
         addi s2, s2, -1 # reduz o contador
-        bne s2, x0, comparaCentroids
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s2, x0, comparaCentroids # sai do loop se s2 = 0
     mv a0, s5
     
     lw s5, 24(sp) # Recupera o valor de s5
@@ -354,7 +358,6 @@ atualizaMinimo:
 mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
-    
     
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar

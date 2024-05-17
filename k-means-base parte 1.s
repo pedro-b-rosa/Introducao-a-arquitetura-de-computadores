@@ -109,9 +109,6 @@ cleanScreen:
     
     jr ra # dah jump para ra
     
-acabaLoop:
-    jr ra
-    
 ### printClusters
 # Pinta os agrupamentos na LED matrix com a cor correspondente.
 # Argumentos: nenhum
