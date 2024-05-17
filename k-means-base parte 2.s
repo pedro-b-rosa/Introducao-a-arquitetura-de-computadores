@@ -295,7 +295,7 @@ atualizaCentroids:
 # a2: novo numero de pontos do centroid
 
 soma:
-    lb t0, 0(a3)
+    lb t0, 0(a3) # t0 é o clutters
     bne t0, a4, volta
     lw t1, 0(a5) # x
     lw t2, 4(a5) # y
@@ -433,14 +433,7 @@ mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
-    jal ra, calculateCentroids
-    la t1, centroids
-    lw a0, 0(t1)
-    lw a1, 4(t1)
-    lw a2, 8(t1)
-    lw a3, 12(t1)
-    lw a4, 16(t1)
-    lw a5, 20(t1)
+    
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 4 # Dah pop na stack
