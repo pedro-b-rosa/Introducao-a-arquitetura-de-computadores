@@ -65,7 +65,7 @@ colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0
  
 .text
     # Descomentar na 2a parte do projeto:
-    jal mainKMeans
+    jal ra, mainKMeans
     
     #Termina o programa (chamando chamada sistema)
     li a7, 10
@@ -101,36 +101,17 @@ printPoint:
 # Retorno: nenhum
 
 cleanScreen:
-    # POR IMPLEMENTAR (1a parte)
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    li t0, 1024 # numero de pontos 32*32 = 1024
+    li t1, LED_MATRIX_0_BASE # endereco do primeiro ponto da matrix
+    li t2, white # cor que vamos pintar a matrix
     
-    li a0, 1024 # numero de pontos 32*32 = 1024
-    li a1, LED_MATRIX_0_BASE # endereco do primeiro ponto da matrix
-    li a2, white # cor que vamos pintar a matrix
-    jal ra, cleanLoop # entra no Loop para limpar ponto a ponto
+    cleanLoop:
+        sw t2, 0(t1) # pinta de branco o ponto da matrix com o endereco a1
+        addi t1, t1, 4 # passa para o pr?ximo ponto da matrix
+        addi t0, t0, -1 # reduz o contador (a0)
+        bne t0, x0, cleanLoop # volta caso a0 != 0
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
     jr ra # dah jump para ra
-
-### cleanLoop
-# Limpa todos os pontos do ecra
-# Argumentos:
-# a0: numero de pontos 32*32 = 1024
-# a1: endereco do primeiro ponto da matrix
-# a2: cor que vamos pintar a matrix
-# Retorno: nenhum
-
-cleanLoop:
-    beq a0, x0, acabaLoop # acaba o loop caso a0 = 0
-    sw a2, 0(a1) # pinta de branco o ponto da matrix com o endereco a1
-    addi a1, a1, 4 # passa para o pr?ximo ponto da matrix
-    addi a0, a0, -1 # reduz o contador (a0)
-    j cleanLoop # volta para o loop 
-    
-acabaLoop:
-    jr ra
     
 ### printClusters
 # Pinta os agrupamentos na LED matrix com a cor correspondente.
@@ -138,45 +119,32 @@ acabaLoop:
 # Retorno: nenhum
 
 printClusters:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda s0
+    sw s1, 4(sp) # Guarda s1
     
-    lw a0, n_points # numero de pontos
-    la a1, points # endereco da lista de pontos
-    jal ra, printListaPontos
+    lw s0, n_points # numero de pontos
+    la s1, points # endereco da lista de pontos
+    printListaPontos:
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
+        
+        lw a0, 0(s1) # x
+        lw a1, 4(s1) # y
+        li a2, black # cor do ponto
+        jal ra, printPoint
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
-    jr ra 
-
-### printListaPontos
-# Pinta os agrupamentos na LED matrix com a cor correspondente.
-# Argumentos:
-# a0: numero de pontos
-# a1: endereco da lista de pontos
-# Retorno: nenhum
-
-printListaPontos:
-    beq a0, x0, acabaLoop # se a0 = 0 acaba
-    addi sp, sp, -12 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    sw a0, 4(sp) # Guarda o numero de pontos que ainda falta pintar
-    sw a1, 8(sp) # Guarda o endereco o x que vamos pintar
+        addi s1, s1, 8 # passa para o proximo x
+        addi s0, s0, -1 # decrementa 1 ao contador
+        
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s0, x0, printListaPontos # se a0 = 0 acaba
     
-    lw a0, 0(a1) # x
-    lw a1, 4(a1) # y
-    li a2, black # cor do ponto
-    jal ra, printPoint
-    
-    lw a0, 4(sp) # Recupera o numero de pontos que ainda falta pintar
-    lw a1, 8(sp) # Recupera o endereco o x que pintamos
-    addi a1, a1, 8 # passa para o proximo x
-    addi a0, a0, -1 # decrementa 1 ao contador
-    
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 12 # Dah pop na stack
-    j printListaPontos # volta para o inicio do loop
+    lw s0, 0(sp) # Recupera s0
+    lw s1, 4(sp) # Recupera s1
+    addi sp, sp, 8 # Dah pop na stack
+    jr ra
 
 ### printCentroids
 # Pinta os centroides na LED matrix
@@ -185,17 +153,32 @@ printListaPontos:
 # Retorno: nenhum
 
 printCentroids:
-    # POR IMPLEMENTAR (1a e 2a parte)
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda s0
+    sw s1, 4(sp) # Guarda s1
     
-    lw a0, k # numero de centroids
-    la a1, centroids # endereco da lista de centroids
-    jal ra, printListaPontos
+    lw s0, k # numero de centroids
+    la s1, centroids # endereco da lista de centroids
+    printListaCentroids:
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
+        
+        lw a0, 0(s1) # x
+        lw a1, 4(s1) # y
+        li a2, black # cor do ponto
+        jal ra, printPoint
     
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
-    jr ra 
+        addi s1, s1, 8 # passa para o proximo x
+        addi s0, s0, -1 # decrementa 1 ao contador
+        
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s0, x0, printListaPontos # se a0 = 0 acaba
+    
+    lw s0, 0(sp) # Recupera s0
+    lw s1, 4(sp) # Recupera s1
+    addi sp, sp, 8 # Dah pop na stack
+    jr ra
 
 ### calculateCentroids
 # Calcula os k centroides, a partir da distribuicao atual de pontos associados a cada agrupamento (cluster)
@@ -203,51 +186,122 @@ printCentroids:
 # Retorno: nenhum
 
 calculateCentroids:
-    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    sw s0, 4(sp) # Guarda o valor de s0
+    addi sp, sp, -44 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda o valor de s0
+    sw s1, 4(sp) # Guarda o valor de s1
+    sw s2, 8(sp) # Guarda o valor de s2
+    sw s3, 12(sp) # Guarda o valor de s3
+    sw s4, 16(sp) # Guarda o valor de s4
+    sw s5, 20(sp) # Guarda o valor de s5
+    sw s6, 24(sp) # Guarda o valor de s6
+    sw s7, 28(sp) # Guarda o valor de s7
+    sw s8, 32(sp) # Guarda o valor de s8
+    sw s9, 36(sp) # Guarda o valor de s9
+    sw s10, 40(sp) # Guarda o valor de s10
     
-    lw a0, n_points # Guarda em a0 o numero de pontos
-    la a1, points # Guarda em a1 o endereco para o primeiro elemento da lista de pontos
-    la a2, clusters #Guarda em a2 o enderesso para o primeiro elemento de lista clusters
-    lw s3, k # Guarda em a3 o numero de centroides 
+    lw s0, n_points # Guarda em s0 o numero de pontos
+    la s1, points # Guarda em s1 o endereco para o primeiro elemento da lista de pontos
+    la s2, clusters # Guarda em s2 o enderesso para o primeiro elemento de lista clusters
+    lw s3, k # Guarda em s3 o numero de centroides
+    la s10, centroids # Guarda em s10 o enderesso para o primeiro elemento de lista centroids
+    addi t0, s3, -1 # t0 = k - 1
+    slli t0, t0, 3 # t0 = t0 * 8
+    add s10, s10, t0 # s10 passa a ser o x do ultimo centroid
     calculateLoop:
-        beq s3, x0, acabaLoop
-    
-        addi s3, s3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)
+        addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+        sw ra, 0(sp) # Guardar o endereco para onde voltar
         
+        addi s3, s3, -1 # a3 = a3 -1 (centroid indice do centroid que vamos calcular)
+        mv s4, s1 # s4 passa a ter o endereco para o primeiro elemento da lista de pontos
+        mv s5, s2 # s5 passa a ter o endereco para o primeiro elemento da lista de clusters
+        mv s6, s0 # s6 passa a ter o numero de pontos 
+        li s7, 0 # Inizializar a soma de x a 0
+        li s8, 0 # Inizializar a soma de y a 0
+        li s9, 0 # Inicializar o numero de pontos do centroid a 0
+        calculateLoop2:
+            addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+            sw ra, 0(sp) # Guardar o endereco para onde voltar
+            
+            mv a0, s7 # a0: soma dos x
+            mv a1, s8 # a1: soma dos y
+            mv a2, s9 # a2: numero de pontos do centroid
+            mv a3, s5 # a3: endereco do cluster
+            mv a4, s3 # a4: indice do centroid
+            mv a5, s4 # a5: endereco do ponto x
+            jal ra, soma # a5: numero de pontos do centroid
+            mv s7, a0 # atualiza a soma dos x
+            mv s8, a1 # atualiza a soma dos y
+            mv s9, a2 # atualiza o numero de pontos nesse grupo
+            
+            addi s4, s4, 8 # passa para o proximo ponto no vetor pontos
+            addi s5, s5, 1 # passa para o proximo ponto no vetor clusters
+            addi s6, s6, -1 # diminui o contador
+            
+            lw ra, 0(sp) # Recupera o endereco para onde voltar
+            addi sp, sp, 4 # Dah pop na stack
+            bne s6, x0, calculateLoop2 # acaba se s3 = 0
+        div a0, s7, s9 # a0: x do centroid
+        div a1, s8, s9 # a1: y do centroid
+        mv a2, s9 # a2: numero de pontos do centroide
+        mv a3, s10 # a3: endereco de x do centroid
+        jal ra, atualizaCentroids
+        addi s10, s10, -8 # passa para o proximo centroid
+        
+        lw ra, 0(sp) # Recupera o endereco para onde voltar
+        addi sp, sp, 4 # Dah pop na stack
+        bne s3, x0, calculateLoop # acaba se s3 = 0
     
-        j calculateLoop
-    
-    lw s0, 4(sp) # Recupera o valor de s0
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 8 # Dah pop na stack
-    jr ra 
+    lw s0, 0(sp) # Recupera o valor de s0
+    lw s1, 4(sp) # Recupera o valor de s1
+    lw s2, 8(sp) # Recupera o valor de s2
+    lw s3, 12(sp) # Recupera o valor de s3
+    lw s4, 16(sp) # Recupera o valor de s4
+    lw s5, 20(sp) # Recupera o valor de s5
+    lw s6, 24(sp) # Recupera o valor de s6
+    lw s7, 28(sp) # Recupera o valor de s7
+    lw s8, 32(sp) # Recupera o valor de s8
+    lw s9, 36(sp) # Recupera o valor de s9
+    lw s10, 40(sp) # Recupera o valor de s10
+    addi sp, sp, 44 # Dah pop na stack
+    jr ra
+
+### atualizaCentroids
+# soma os pontos
+# Argumentos:
+# a0: x do centroid
+# a1: y do centroid
+# a2: numero de pontos do centroide
+# a3: endereco de x do centroid
+# Retorno: nenhum
+
+atualizaCentroids:
+    beq a2, x0, volta
+    sw a0, 0(a3) # Guarda o x do centroid
+    sw a1, 4(a3) # Guarda o y do centroid
+    jr ra
 
 ### soma
 # soma os pontos
 # Argumentos:
-# a0: numero de pontos
-# a1: endereco da lista de pontos
-# a2: endereco da lista de clusters
-# Retorno:
 # a0: soma dos x
 # a1: soma dos y
-# a2: numero de pontos desse centoide
+# a2: numero de pontos do centroid
+# a3: endereco do cluster
+# a4: indice do centroid
+# a5: endereco do ponto x
+# Retorno:
+# a0: nova soma dos x
+# a1: nova soma dos y
+# a2: novo numero de pontos do centroid
+
 soma:
-    beq a0, x0, acabaSoma # se a0 = 0 acaba
-    addi a0, a0, -1 # a0 = a0 -1
-    
-    lw t2, 0(a1) # x
-    lw t3, 4(a1) # y
-    add t0, t0, t2 # t0 = t0 + t2
-    add t1, t1, t3 # t1 = t1 + t3
-    addi a1, a1, 8 # passa para o proximo x
-    j soma
-    
-acabaSoma:
-    mv a0, t0 # guarda o valor da soma x no registo de retorno
-    mv a1, t1 # guarda o valor da soma y no registo de retorno
+    lb t0, 0(a3)
+    bne t0, a4, volta
+    lw t1, 0(a5) # x
+    lw t2, 4(a5) # y
+    add a0, a0, t1 # atualiza a soma x
+    add a1, a1, t2 # atualiza a soma y
+    addi a2, a2, 1 # atualiza o numero de pontos do centroid
     jr ra
 
 ### manhattanDistance
@@ -286,8 +340,10 @@ manhattanDistance:
 # a0: -a0
 
 inverso:
-    bgt a0, x0, acabaLoop # se a subtracao der um numero positivo volta para onde ficou
+    bgt a0, x0, volta # se a subtracao der um numero positivo volta para onde ficou
     neg a0, a0 # nega o a0
+    
+volta:
     jr ra
 
 ### nearestCluster
@@ -298,14 +354,13 @@ inverso:
 # a0: cluster index
 
 nearestCluster:
-    addi sp, sp, -28 # Atualiza o ponteiro para a ultima posicao do stack
-    sw ra, 0(sp) # Guardar o endereco para onde voltar
-    sw s0, 4(sp) # Guarda o valor de s0
-    sw s1, 8(sp) # Guarda o valor de s1
-    sw s2, 12(sp) # Guarda o valor de s2
-    sw s3, 16(sp) # Guarda o valor de s3
-    sw s4, 20(sp) # Guarda o valor de s4
-    sw s5, 24(sp) # Guarda o valor de s5
+    addi sp, sp, -24 # Atualiza o ponteiro para a ultima posicao do stack
+    sw s0, 0(sp) # Guarda o valor de s0
+    sw s1, 4(sp) # Guarda o valor de s1
+    sw s2, 8(sp) # Guarda o valor de s2
+    sw s3, 12(sp) # Guarda o valor de s3
+    sw s4, 16(sp) # Guarda o valor de s4
+    sw s5, 20(sp) # Guarda o valor de s5
     
     lw s2, k # guarda o valor de k em a2
     la s3, centroids # guarda em a3 o primeiro endereco do vetor centroids
@@ -323,7 +378,12 @@ nearestCluster:
         lw a2, 0(s3) # guarda em a2 o valor de x1
         lw a3, 4(s3) # guarda em a3 o valor de y1
         jal ra, manhattanDistance
+        mv a1, s2 # a1: numero de centroids que falta ver
+        mv a2, s4 # a2: distancia minima
+        mv a3, s5 # a3: indice antigo
         jal ra, atualizaMinimo
+        mv s4, a0 # guarda em s4 a nova distancia minima
+        mv s5, a1 # guarda em s5 o novo indice
     
         addi s3, s3, 8 # passa para o endereco do proximo x
         addi s2, s2, -1 # reduz o contador
@@ -332,22 +392,36 @@ nearestCluster:
         bne s2, x0, comparaCentroids # sai do loop se s2 = 0
     mv a0, s5
     
-    lw s5, 24(sp) # Recupera o valor de s5
-    lw s4, 20(sp) # Recupera o valor de s4
-    lw s3, 16(sp) # Recupera o valor de s3
-    lw s2, 12(sp) # Recupera o valor de s2
-    lw s1, 8(sp) # Recupera o valor de s1
-    lw s0, 4(sp) # Recupera o valor de s0
-    lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 28 # Dah pop na stack
+    lw s5, 20(sp) # Recupera o valor de s5
+    lw s4, 16(sp) # Recupera o valor de s4
+    lw s3, 12(sp) # Recupera o valor de s3
+    lw s2, 8(sp) # Recupera o valor de s2
+    lw s1, 4(sp) # Recupera o valor de s1
+    lw s0, 0(sp) # Recupera o valor de s0
+    addi sp, sp, 24 # Dah pop na stack
     jr ra
     
+### atualizaMinimo
+# Executa o algoritmo *k-means*.
+# Argumentos:
+# a0: distancia
+# a1: numero de centroids que falta ver
+# a2: distancia minima
+# a3: indice antigo
+# Retorno:
+# a0: nova distancia minima
+# a1: novo indice
+
 atualizaMinimo:
-    bgt a0, s4, acabaLoop # se a0 > s4 entao nao troca os minimos
-    mv s4, a0 # guarda em s4 a nova distancia minima
+    mv t3, a0 # Guarda 
+    mv t2, a1
+    mv a1, a3 # indice antigo
+    mv a0, a2
+    bgt t3, a2, volta # se a0 > a2 entao nao troca os minimos
+    mv a0, t3
     lw t0, k # guarda o numero de centroids
-    sub t1, t0, s2 # calcula o indice do centroid
-    mv s5, t1 # guarda em s5 o novo indice
+    sub t1, t0, t2 # calcula o indice do centroid
+    mv a1, t1 # guarda em a0 o novo indice
     jr ra
     
 ### mainKMeans
@@ -359,6 +433,14 @@ mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
+    jal ra, calculateCentroids
+    la t1, centroids
+    lw a0, 0(t1)
+    lw a1, 4(t1)
+    lw a2, 8(t1)
+    lw a3, 12(t1)
+    lw a4, 16(t1)
+    lw a5, 20(t1)
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 4 # Dah pop na stack
