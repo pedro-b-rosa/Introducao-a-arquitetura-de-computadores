@@ -105,7 +105,7 @@ cleanScreen:
         sw t2, 0(t1) # pinta de branco o ponto da matrix com o endereco a1
         addi t1, t1, 4 # passa para o pr?ximo ponto da matrix
         addi t0, t0, -1 # reduz o contador (a0)
-        bne t0, t0, cleanLoop # volta caso a0 != 0
+        bne t0, x0, cleanLoop # volta caso a0 != 0
     
     jr ra # dah jump para ra
     
