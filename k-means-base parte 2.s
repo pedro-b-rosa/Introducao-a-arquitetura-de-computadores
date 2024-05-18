@@ -42,9 +42,10 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 
 
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
-centroids:   .word 0,0, 10,0, 0,10
+#centroids:   .word 0,0, 10,0, 0,10
 k:           .word 3
 L:           .word 10
+centroids:   .word 0,0, 31,0, 0,10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
@@ -119,23 +120,38 @@ cleanScreen:
 # Retorno: nenhum
 
 printClusters:
-    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    addi sp, sp, -24 # Atualiza o ponteiro para a ultima posicao do stack
     sw s0, 0(sp) # Guarda s0
     sw s1, 4(sp) # Guarda s1
+    sw s2, 8(sp) # Guarda s2
+    sw s3, 12(sp) # Guarda s3
+    sw s4, 16(sp) # Guarda s4
+    sw s5, 20(sp) # Guarda s5
     
     lw s0, n_points # numero de pontos
     la s1, points # endereco da lista de pontos
+    la s2, colors # endereco da lista de cores
+    la s3, clusters # endereco da lista de clusters
     printListaPontos:
         addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
         sw ra, 0(sp) # Guardar o endereco para onde voltar
         
-        lw a0, 0(s1) # x
-        lw a1, 4(s1) # y
-        li a2, black # cor do ponto
+        lw s4, 0(s1) # x
+        lw s5, 4(s1) # y
+        mv a0, s4 # a0: soma dos x
+        mv a1, s5 # a1: soma dos y
+        jal ra, nearestCluster
+        sw a0, 0(s3) # guarda o indice no vetor
+        slli a0, a0, 2 # multiplica o indice por 4
+        add t0, a0, s2 # t0 fica com o endereco para a cor do centroid
+        mv a0, s4 # a0: soma dos x
+        mv a1, s5 # a1: soma dos y
+        lw a2, 0(t0) # a2: cor
         jal ra, printPoint
     
         addi s1, s1, 8 # passa para o proximo x
         addi s0, s0, -1 # decrementa 1 ao contador
+        addi s3, s3, 1 # passa para o proximo ponto
         
         lw ra, 0(sp) # Recupera o endereco para onde voltar
         addi sp, sp, 4 # Dah pop na stack
@@ -143,7 +159,11 @@ printClusters:
     
     lw s0, 0(sp) # Recupera s0
     lw s1, 4(sp) # Recupera s1
-    addi sp, sp, 8 # Dah pop na stack
+    lw s2, 8(sp) # Recupera s2
+    lw s3, 12(sp) # Recupera s3
+    lw s4, 16(sp) # Recupera s4
+    lw s5, 20(sp) # Recupera s5
+    addi sp, sp, 24 # Dah pop na stack
     jr ra
 
 ### printCentroids
@@ -440,7 +460,8 @@ mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
-    jal ra, cleanScreen
+    #jal ra, cleanScreen
+    jal ra, printClusters
     jal ra, calculateCentroids
     jal ra, printCentroids
     
