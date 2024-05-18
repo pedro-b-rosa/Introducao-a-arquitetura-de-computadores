@@ -466,10 +466,10 @@ mainKMeans:
     lw s0, L # numero de iteracoes
     li s1, 0
     mainLoop:
-        #jal ra, cleanScreen
-        #jal ra, printClusters
-        #jal ra, calculateCentroids
-        #jal ra, printCentroids
+        jal ra, cleanScreen
+        jal ra, printClusters
+        jal ra, calculateCentroids
+        jal ra, printCentroids
         jal ra, verificaIguais
         mv s2, a0
         addi s1, s1, 1
