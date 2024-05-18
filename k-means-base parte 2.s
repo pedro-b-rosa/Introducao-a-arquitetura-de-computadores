@@ -45,7 +45,7 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 #centroids:   .word 0,0, 10,0, 0,10
 k:           .word 3
 L:           .word 10
-centroids:   .word 0,0, 31,0, 0,10
+centroids:   .word 0,0, 10,0, 0,31
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
@@ -141,7 +141,7 @@ printClusters:
         mv a0, s4 # a0: soma dos x
         mv a1, s5 # a1: soma dos y
         jal ra, nearestCluster
-        sw a0, 0(s3) # guarda o indice no vetor
+        sb a0, 0(s3) # guarda o indice no vetor
         slli a0, a0, 2 # multiplica o indice por 4
         add t0, a0, s2 # t0 fica com o endereco para a cor do centroid
         mv a0, s4 # a0: soma dos x
