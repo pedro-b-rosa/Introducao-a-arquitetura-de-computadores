@@ -48,9 +48,9 @@ L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
+centroids_antigos: .word 0,0, 10,0, 0,10
 n_points:    .word N
 clusters:    .zero N # mudar o numero de n_points
-centroids_antigos: .word 0,0, 10,0, 0,31
 
 
 
@@ -466,10 +466,10 @@ mainKMeans:
     lw s0, L # numero de iteracoes
     li s1, 0
     mainLoop:
-        jal ra, cleanScreen
-        jal ra, printClusters
-        jal ra, calculateCentroids
-        jal ra, printCentroids
+        #jal ra, cleanScreen
+        #jal ra, printClusters
+        #jal ra, calculateCentroids
+        #jal ra, printCentroids
         jal ra, verificaIguais
         mv s2, a0
         addi s1, s1, 1
@@ -516,18 +516,17 @@ verificaIguais:
     la t0, centroids # Guarda em t0 o endereco de centroids
     la t1, centroids_antigos # Guarda em t1 o endereco de centroids_antigos
     lw t2, k # numero de centroids
-    li a0, 1 
-    verificaLoop:
-        lw t3, 0(t0) # x
-        lw t4, 0(t1) # x antigo
-        lw t5, 4(t0) # y
-        lw t6, 4(t1) # y antigo
-        addi t0, t0, 8 # passa para o proximo tentar
-        addi t1, t1, 8 # passa para o proximo tentar
-        addi t2, t2, -1 # encrementa 1 ao contador
-        beq t3, t4, volta # se for igual volta e devolve 1
-        beq t5, t6, volta # se for igual volta e devolve 1
-        bne t0, x0, verificaLoop
-
+    slli t2, t2, 1 # k*2
     li a0, 0
+    verificaLoop:
+        addi t2, t2, -1 # encrementa 1 ao contador
+        lw t3, 0(t0) # novo
+        lw t4, 0(t1) # antigo
+        addi t0, t0, 4 # passa para o proximo tentar
+        addi t1, t1, 4 # passa para o proximo tentar
+        li a0, 1
+        bne t3, t4, volta # se nao for igual volta e devolve 0
+        bne t2, x0, verificaLoop
+        
+    li a0, 1
     jr ra
