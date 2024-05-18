@@ -524,7 +524,6 @@ verificaIguais:
         lw t4, 0(t1) # antigo
         addi t0, t0, 4 # passa para o proximo tentar
         addi t1, t1, 4 # passa para o proximo tentar
-        li a0, 1
         bne t3, t4, volta # se nao for igual volta e devolve 0
         bne t2, x0, verificaLoop
         
