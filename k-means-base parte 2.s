@@ -42,15 +42,15 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 
 
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
-#centroids:   .word 0,0, 10,0, 0,10
+centroids:   .word 0,0, 10,0, 0,10
 k:           .word 3
 L:           .word 10
-centroids:   .word 0,0, 10,0, 0,31
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
 n_points:    .word N
 clusters:    .zero N # mudar o numero de n_points
+centroids_antigos: .word 0,0, 10,0, 0,31
 
 
 
@@ -457,14 +457,77 @@ atualizaMinimo:
 # Retorno: nenhum
 
 mainKMeans:
-    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    addi sp, sp, -16 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
+    sw s0, 4(sp) # Guarda s0
+    sw s1, 8(sp) # Guarda s1
+    sw s2, 12(sp) # Guarda s2
     
-    jal ra, cleanScreen
-    jal ra, printClusters
-    jal ra, calculateCentroids
-    jal ra, printCentroids
+    lw s0, L # numero de iteracoes
+    li s1, 0
+    mainLoop:
+        jal ra, cleanScreen
+        jal ra, printClusters
+        jal ra, calculateCentroids
+        jal ra, printCentroids
+        jal ra, verificaIguais
+        mv s2, a0
+        addi s1, s1, 1
+        jal ra, atualizaCentroidAntigo
+        beq s2, x0, mainLoop
+        bne s1, s0, mainLoop
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
-    addi sp, sp, 4 # Dah pop na stack
+    lw s0, 4(sp) # Recupera s0
+    lw s1, 8(sp) # Recupera s1
+    lw s2, 12(sp) # Recupera s2
+    addi sp, sp, 16 # Dah pop na stack
+    jr ra
+    
+### atualizaCentroidAntigo
+# atualiza o centroid antigo
+# Argumentos: nenhum
+# Retorno: nenhum
+
+atualizaCentroidAntigo:
+    la t0, centroids # Guarda em t0 o endereco de centroids
+    la t1, centroids_antigos # Guarda em t1 o endereco de centroids_antigos
+    lw t2, k # numero de centroids
+    
+    atualizaLoop:
+        lw t3, 0(t0) # x
+        sw t3, 0(t1) # x antigo
+        lw t5, 4(t0) # y
+        sw t5, 4(t1) # y antigo
+        addi t0, t0, 8 # passa para o proximo tentar
+        addi t1, t1, 8 # passa para o proximo tentar
+        addi t2, t2, -1 # encrementa 1 ao contador
+        bne t2, x0, atualizaLoop
+        
+    jr ra
+
+### verificaIguais
+# verifica se os centroids se alteraram
+# Argumentos: nenhum
+# Retorno: 
+# a0: 1 se forem iguais e 0 se forem diferentes
+
+verificaIguais:
+    la t0, centroids # Guarda em t0 o endereco de centroids
+    la t1, centroids_antigos # Guarda em t1 o endereco de centroids_antigos
+    lw t2, k # numero de centroids
+    li a0, 1 
+    verificaLoop:
+        lw t3, 0(t0) # x
+        lw t4, 0(t1) # x antigo
+        lw t5, 4(t0) # y
+        lw t6, 4(t1) # y antigo
+        addi t0, t0, 8 # passa para o proximo tentar
+        addi t1, t1, 8 # passa para o proximo tentar
+        addi t2, t2, -1 # encrementa 1 ao contador
+        beq t3, t4, volta # se for igual volta e devolve 1
+        beq t5, t6, volta # se for igual volta e devolve 1
+        bne t0, x0, verificaLoop
+
+    li a0, 0
     jr ra
