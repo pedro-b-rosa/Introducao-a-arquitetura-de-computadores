@@ -460,7 +460,7 @@ mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
-    #jal ra, cleanScreen
+    jal ra, cleanScreen
     jal ra, printClusters
     jal ra, calculateCentroids
     jal ra, printCentroids
