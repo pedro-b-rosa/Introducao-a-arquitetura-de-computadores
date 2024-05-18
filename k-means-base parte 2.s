@@ -153,31 +153,38 @@ printClusters:
 # Retorno: nenhum
 
 printCentroids:
-    addi sp, sp, -8 # Atualiza o ponteiro para a ultima posicao do stack
+    addi sp, sp, -16 # Atualiza o ponteiro para a ultima posicao do stack
     sw s0, 0(sp) # Guarda s0
     sw s1, 4(sp) # Guarda s1
+    sw s2, 8(sp) # Guarda s2
+    sw s3, 12(sp) # Guarda s3
     
     lw s0, k # numero de centroids
     la s1, centroids # endereco da lista de centroids
+    li s2, 0 # Inicializa o contador a 0
+    la s3, colors # endereco da lista de cores
     printListaCentroids:
         addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
         sw ra, 0(sp) # Guardar o endereco para onde voltar
         
         lw a0, 0(s1) # x
         lw a1, 4(s1) # y
-        li a2, black # cor do ponto
+        lw a2, 0(s3) # color
         jal ra, printPoint
-    
+        
         addi s1, s1, 8 # passa para o proximo x
-        addi s0, s0, -1 # decrementa 1 ao contador
+        addi s2, s2, 1 # incrementa 1 ao contador
+        addi s3, s3, 4 # passa para a proxima cor
         
         lw ra, 0(sp) # Recupera o endereco para onde voltar
         addi sp, sp, 4 # Dah pop na stack
-        bne s0, x0, printListaPontos # se a0 = 0 acaba
+        blt s2, s0, printListaCentroids # se a0 = 0 acaba
     
     lw s0, 0(sp) # Recupera s0
     lw s1, 4(sp) # Recupera s1
-    addi sp, sp, 8 # Dah pop na stack
+    lw s2, 8(sp) # Recupera s2
+    lw s3, 12(sp) # Recupera s3
+    addi sp, sp, 16 # Dah pop na stack
     jr ra
 
 ### calculateCentroids
@@ -295,7 +302,7 @@ atualizaCentroids:
 # a2: novo numero de pontos do centroid
 
 soma:
-    lb t0, 0(a3) # t0 é o clutters
+    lb t0, 0(a3) # t0 ? o clutters
     bne t0, a4, volta
     lw t1, 0(a5) # x
     lw t2, 4(a5) # y
@@ -433,7 +440,9 @@ mainKMeans:
     addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
     sw ra, 0(sp) # Guardar o endereco para onde voltar
     
-    
+    jal ra, cleanScreen
+    jal ra, calculateCentroids
+    jal ra, printCentroids
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
     addi sp, sp, 4 # Dah pop na stack
