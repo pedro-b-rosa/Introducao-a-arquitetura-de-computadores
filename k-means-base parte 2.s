@@ -172,28 +172,25 @@ printClusters:
 # Retorno: nenhum
 
 printCentroids:
-    addi sp, sp, -16 # Atualiza o ponteiro para a ultima posicao do stack
+    addi sp, sp, -12 # Atualiza o ponteiro para a ultima posicao do stack
     sw s0, 0(sp) # Guarda s0
     sw s1, 4(sp) # Guarda s1
     sw s2, 8(sp) # Guarda s2
-    sw s3, 12(sp) # Guarda s3
     
     lw s0, k # numero de centroids
     la s1, centroids # endereco da lista de centroids
     li s2, 0 # Inicializa o contador a 0
-    la s3, colors # endereco da lista de cores
     printListaCentroids:
         addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
         sw ra, 0(sp) # Guardar o endereco para onde voltar
         
         lw a0, 0(s1) # x
         lw a1, 4(s1) # y
-        lw a2, 0(s3) # color
+        li a2, black # coluquei a cor a preto para se ver melhor onde estão
         jal ra, printPoint
         
         addi s1, s1, 8 # passa para o proximo x
         addi s2, s2, 1 # incrementa 1 ao contador
-        addi s3, s3, 4 # passa para a proxima cor
         
         lw ra, 0(sp) # Recupera o endereco para onde voltar
         addi sp, sp, 4 # Dah pop na stack
@@ -202,8 +199,7 @@ printCentroids:
     lw s0, 0(sp) # Recupera s0
     lw s1, 4(sp) # Recupera s1
     lw s2, 8(sp) # Recupera s2
-    lw s3, 12(sp) # Recupera s3
-    addi sp, sp, 16 # Dah pop na stack
+    addi sp, sp, 12 # Dah pop na stack
     jr ra
 
 ### calculateCentroids
