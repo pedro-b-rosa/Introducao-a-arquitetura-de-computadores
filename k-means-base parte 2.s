@@ -505,10 +505,10 @@ mainKMeans:
         jal ra, calculateCentroids
         jal ra, printCentroids
         jal ra, verificaIguais
-        mv s2, a0
-        addi s1, s1, 1
+        mv s2, a0 # guarda em s2 o que verifica retornou
+        addi s1, s1, 1 # incrementa o acomulador
         jal ra, atualizaCentroidAntigo
-        bne s2, x0, 8
+        bne s2, x0, 8 # caso os centroids não mudem sai do loop
         bne s1, s0, mainLoop
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
