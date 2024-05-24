@@ -42,13 +42,13 @@ points:      .word 16, 1, 17, 2, 18, 6, 20, 3, 21, 1, 17, 4, 21, 7, 16, 4, 21, 6
 
 
 # Valores de centroids, k e L a usar na 2a parte do prejeto:
-centroids:   .word 0,0, 10,0, 0,10
+centroids:   .word 0, 0, 10, 0, 0, 10
 k:           .word 3
 L:           .word 10
 
 # Abaixo devem ser declarados o vetor clusters (2a parte) e outras estruturas de dados
 # que o grupo considere necessarias para a solucao:
-centroids_antigos: .word 0,0, 10,0, 0,10
+centroids_antigos: .word 1,2, 3, 4, 5, 6
 n_points:    .word N
 clusters:    .zero N # mudar o numero de n_points
 
@@ -71,7 +71,6 @@ colors:      .word 0xff0000, 0x00ff00, 0x0000ff  # Cores dos pontos do cluster 0
     #Termina o programa (chamando chamada sistema)
     li a7, 10
     ecall
-
 
 ### printPoint
 # Pinta o ponto (x,y) na LED matrix com a cor passada por argumento
@@ -450,6 +449,39 @@ atualizaMinimo:
     sub t1, t0, t2 # calcula o indice do centroid
     mv a1, t1 # guarda em a0 o novo indice
     jr ra
+
+### mainKMeans
+# Este procedimento inicializa os valores iniciais do vetor centroides e centroides_antigos
+# Argumentos: nenhum
+# Retorno: nenhum
+ 
+initializeCentroids:
+    addi sp, sp, -4 # Atualiza o ponteiro para a ultima posicao do stack
+    sw ra, 0(sp) # Guardar o endereco para onde voltar
+    
+    li a7, 30
+    ecall
+    la t0, centroids # Guarda em t0 o endereco de centroids
+    lw t2, k # numero de centroids
+    li t3, 1103515245
+    li t4, 12345
+    slli t2, t2, 1 # t2 passa a ter o numero de vezes que passa no loop
+    loopInicialize:
+        addi t2, t2, -1 # decrementa 1 ao contador
+        mul a0, a0, t3 # Xn*1103515245
+        add a0, a0, t4 # X(n+1) = Xn*1103515245 + 12345
+        srli t5, a0, 5 # t5 = X(n+1)/32
+        slli t5, t5, 5 # t5 = t5*32
+        sub t5, a0, t5 # t5 = mod(X, 32)
+        sw t5,0(t0) # guarda na memoria
+        addi t0, t0, 4 # passa para o endereco do próximo numero a guardar
+        bne t2, x0, loopInicialize # caso t2 não seja 0 volta para o loop
+    
+    jal atualizaCentroidAntigo
+    
+    lw ra, 0(sp) # Recupera o endereco para onde voltar
+    addi sp, sp, 4 # Dah pop na stack
+    jr ra
     
 ### mainKMeans
 # Executa o algoritmo *k-means*.
@@ -463,6 +495,8 @@ mainKMeans:
     sw s1, 8(sp) # Guarda s1
     sw s2, 12(sp) # Guarda s2
     
+    jal ra, initializeCentroids
+    
     lw s0, L # numero de iteracoes
     li s1, 0
     mainLoop:
@@ -474,7 +508,7 @@ mainKMeans:
         mv s2, a0
         addi s1, s1, 1
         jal ra, atualizaCentroidAntigo
-        beq s2, x0, mainLoop
+        bne s2, x0, 8
         bne s1, s0, mainLoop
     
     lw ra, 0(sp) # Recupera o endereco para onde voltar
